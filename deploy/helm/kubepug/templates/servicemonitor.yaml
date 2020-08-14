@@ -1,0 +1,32 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "kubepug.fullname" . }}
+  {{- if .Values.metrics.serviceMonitor.namespace }}
+  namespace: {{ .Values.server.metrics.serviceMonitor.namespace | default .Release.Namespace }}
+  {{- end }}
+  labels:
+    monitoring: prometheus
+    app.kubernetes.io/name: {{ include "kubepug.name" . }}
+    helm.sh/chart: {{ include "kubepug.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- if .Values.metrics.serviceMonitor.selector }}
+{{- toYaml .Values.metrics.serviceMonitor.selector | nindent 4 }}
+    {{- end }}
+    {{- if .Values.metrics.serviceMonitor.additionalLabels }}
+{{- toYaml .Values.metrics.serviceMonitor.additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  endpoints:
+    - port: metrics
+      interval: 10s
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "kubepug.name" . }}-metrics

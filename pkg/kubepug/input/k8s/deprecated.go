@@ -10,6 +10,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 
 	"github.com/rikatz/kubepug/pkg/parser"
 	"github.com/rikatz/kubepug/pkg/results"
@@ -21,9 +22,15 @@ func GetDeprecated(KubeAPIs parser.KubernetesAPIs, config *genericclioptions.Con
 
 	var resourceName string
 
-	configRest, err := config.ToRESTConfig()
+	// creates the in-cluster config
+	configRest, err := rest.InClusterConfig()
 	if err != nil {
-		log.Fatalf("Failed to create the K8s config parameters while listing Deprecated objects")
+		// otherwise use config flags
+		configRest, err = config.ToRESTConfig()
+		if err != nil {
+			log.Fatalf("Failed to create the K8s config parameters while listing Deprecated objects")
+		}
+
 	}
 
 	client, err := dynamic.NewForConfig(configRest)

@@ -78,7 +78,7 @@ func (k *Kubepug) MeasureResults(result *results.Result, c *prometheus.CounterVe
 				"scope":       item.Scope,
 				"object_name": item.ObjectName,
 				"namespace":   item.Namespace,
-				"deprocated":  strconv.FormatBool(d.Deprecated),
+				"deprecated":  strconv.FormatBool(d.Deprecated),
 				"deleted":     "",
 			}).Inc()
 		}
@@ -94,7 +94,7 @@ func (k *Kubepug) MeasureResults(result *results.Result, c *prometheus.CounterVe
 				"scope":       item.Scope,
 				"object_name": item.ObjectName,
 				"namespace":   item.Namespace,
-				"deprocated":  "",
+				"deprecated":  "",
 				"deleted":     strconv.FormatBool(d.Deleted),
 			}).Inc()
 		}
