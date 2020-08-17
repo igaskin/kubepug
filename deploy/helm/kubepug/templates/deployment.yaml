@@ -8,6 +8,7 @@ spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
+  revistionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       {{- include "kubepug.selectorLabels" . | nindent 6 }}
@@ -30,11 +31,14 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           args:
-            - --scrape-interval
-            - 30s
             - --monitor
-            - -v
-            - debug
+            - --scrape-interval
+            - {{ .Values.scrapeInterval }}
+            - --k8s-version
+            - {{ .Values.k8sVersion | default "master" }}
+          {{- range .Values.extraArgs }}
+            - {{ . }}
+          {{- end }}
           command:
             - kubepug
           securityContext:
@@ -43,7 +47,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: metrics
-              containerPort: 8888
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:

@@ -59,8 +59,8 @@ var (
 		Version:      getVersion(),
 	}
 
-	deprecatedCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Help: "Counter of deprecated or deleted APIs",
+	deprecatedGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Help: "Gauge of deprecated or deleted APIs",
 		Name: "deprecated_apis_count",
 	}, []string{"group", "kind", "version", "name", "scope", "object_name", "namespace", "deleted", "deprecated"})
 )
@@ -82,7 +82,7 @@ func runPug(cmd *cobra.Command, args []string) error {
 		ConfigFlags:      kubernetesConfigFlags,
 		Input:            inputFile,
 		Monitor:          monitor,
-		DeprecatedMetric: deprecatedCounter,
+		DeprecatedMetric: deprecatedGauge,
 		ScrapeInterval:   scrapeInterval,
 	}
 
@@ -190,7 +190,7 @@ func init() {
 	rootCmd.PersistentFlags().DurationVar(&scrapeInterval, "scrape-interval", defaultScrapeInterval, "Scrape interval to gather prometheus metrics")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "verbosity", "v", logrus.WarnLevel.String(), "Log level: debug, info, warn, error, fatal, panic")
 
-	prometheus.MustRegister(deprecatedCounter)
+	prometheus.MustRegister(deprecatedGauge)
 }
 
 func main() {

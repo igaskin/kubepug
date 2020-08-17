@@ -24,7 +24,7 @@ type Config struct {
 	ShowDescription  bool
 	Input            string
 	Monitor          bool
-	DeprecatedMetric *prometheus.CounterVec
+	DeprecatedMetric *prometheus.GaugeVec
 	ScrapeInterval   time.Duration
 	ConfigFlags      *genericclioptions.ConfigFlags
 }
@@ -66,11 +66,11 @@ func (k *Kubepug) GetDeprecated() (result *results.Result, err error) {
 	return result, nil
 }
 
-// MeasureResults increments prometheus counter for deleted APIs
-func (k *Kubepug) MeasureResults(result *results.Result, c *prometheus.CounterVec) {
+// MeasureResults increments prometheus Gauge for deleted APIs
+func (k *Kubepug) MeasureResults(result *results.Result, g *prometheus.GaugeVec) {
 	for _, d := range result.DeprecatedAPIs {
 		for _, item := range d.Items {
-			c.With(prometheus.Labels{
+			g.With(prometheus.Labels{
 				"group":       d.Group,
 				"version":     d.Version,
 				"kind":        d.Kind,
@@ -79,14 +79,14 @@ func (k *Kubepug) MeasureResults(result *results.Result, c *prometheus.CounterVe
 				"object_name": item.ObjectName,
 				"namespace":   item.Namespace,
 				"deprecated":  strconv.FormatBool(d.Deprecated),
-				"deleted":     "",
-			}).Inc()
+				"deleted":     "false",
+			}).Set(1.0)
 		}
 	}
 
 	for _, d := range result.DeletedAPIs {
 		for _, item := range d.Items {
-			c.With(prometheus.Labels{
+			g.With(prometheus.Labels{
 				"group":       d.Group,
 				"version":     d.Version,
 				"kind":        d.Kind,
@@ -94,9 +94,9 @@ func (k *Kubepug) MeasureResults(result *results.Result, c *prometheus.CounterVe
 				"scope":       item.Scope,
 				"object_name": item.ObjectName,
 				"namespace":   item.Namespace,
-				"deprecated":  "",
+				"deprecated":  "false",
 				"deleted":     strconv.FormatBool(d.Deleted),
-			}).Inc()
+			}).Set(1.0)
 		}
 	}
 }
