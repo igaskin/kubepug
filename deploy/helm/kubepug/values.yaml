@@ -62,6 +62,13 @@ resources:
     cpu: 100m
     memory: 128Mi
 
+livenessProbe:
+  initialDelaySeconds: 60
+  timeoutSeconds: 5
+
+readinessProbe:
+  initialDelaySeconds: 60
+  timeoutSeconds: 5
 
 revisionHistoryLimit: 2
 autoscaling:
