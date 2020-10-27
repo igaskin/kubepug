@@ -12,6 +12,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 
 	"github.com/rikatz/kubepug/pkg/parser"
 	"github.com/rikatz/kubepug/pkg/results"
@@ -97,9 +98,15 @@ func (ignoreStruct ignoreStruct) populateAPIService(dynClient dynamic.Interface,
 // GetDeleted walk through Kubernetes API and verifies which Resources doesn't exists anymore in swagger.json
 func GetDeleted(KubeAPIs parser.KubernetesAPIs, config *genericclioptions.ConfigFlags) (deleted []results.DeletedAPI) {
 
-	configRest, err := config.ToRESTConfig()
+	// creates the in-cluster config
+	configRest, err := rest.InClusterConfig()
 	if err != nil {
-		log.Fatalf("Failed to create the K8s config parameters while listing Deleted objects")
+		// otherwise use config flags
+		configRest, err = config.ToRESTConfig()
+		if err != nil {
+			log.Fatalf("Failed to create the K8s config parameters while listing Deleted objects")
+		}
+
 	}
 
 	discoveryClient, err := discovery.NewDiscoveryClientForConfig(configRest)
